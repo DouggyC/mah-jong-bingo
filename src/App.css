@@ -191,7 +191,8 @@ body::before {
   padding: 1rem;
 }
 .stage__tile {
-  width: clamp(220px, 38vh, 460px);
+  /* width: clamp(220px, 38vh, 460px); */
+  width: 50vh;
   height: auto;
   aspect-ratio: 140 / 200;
   filter:
@@ -250,13 +251,23 @@ body::before {
   line-height: 1;
 }
 
-/* ===== Input panel — top-right corner of main ============= */
-.input-panel {
+/* ===== Right-side column (input panel on top, legend below) ============= */
+.side-column {
   position: absolute;
   top: 14px;
   right: 14px;
   z-index: 10;
-  width: 220px;
+  width: 260px;
+  max-height: calc(100% - 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ===== Input panel (top of side-column) ============================= */
+.input-panel {
+  position: relative;
+  width: 100%;
   padding: 12px 14px 14px;
   background: linear-gradient(180deg, #fdf6dc 0%, #f1e1b0 100%);
   border: 1.5px solid var(--gold);
@@ -267,6 +278,7 @@ body::before {
   font-family: var(--serif);
   color: var(--ink);
 }
+
 .input-panel::before {
   content: '';
   position: absolute;
@@ -530,32 +542,29 @@ body::before {
 
 /* ===== Responsive niceties ================================ */
 @media (max-width: 720px) {
-  .input-panel {
-    width: 180px;
-    padding: 10px;
+  .side-column {
+    width: 200px;
     top: 8px;
     right: 8px;
+    gap: 8px;
+  }
+  .input-panel {
+    padding: 10px;
   }
   .header__decor { display: none; }
   .header__title { gap: 0.4em; }
   .stage__tile { width: clamp(180px, 32vh, 320px); }
-  .legend {
-    width: 200px;
-    padding: 8px;
-    top: 8px;
-    left: 8px;
-  }
+  .legend { padding: 8px; }
   .legend__chip { font-size: 0.7rem; min-width: 26px; padding: 2px 4px; }
+
 }
 
-/* ===== Legend — top-left corner of main =================== */
+/* ===== Legend — bottom of side-column ============================= */
 .legend {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  z-index: 10;
-  width: 260px;
-  max-height: calc(100% - 28px);
+  position: relative;
+  width: 100%;
+  min-height: 0; /* allow flex children to shrink + scroll */
+  flex: 1 1 auto;
   padding: 10px 12px 12px;
   background: linear-gradient(180deg, #fdf6dc 0%, #f1e1b0 100%);
   border: 1.5px solid var(--gold);
@@ -569,6 +578,7 @@ body::before {
   display: flex;
   flex-direction: column;
 }
+
 .legend::before {
   content: '';
   position: absolute;

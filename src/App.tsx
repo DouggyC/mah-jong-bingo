@@ -209,54 +209,9 @@ function App() {
           )}
         </section>
 
-        {/* Legend — top-left corner of main */}
-        <aside className='legend' aria-label='Tile code legend'>
-          <div className='legend__title'>
-            <span className='legend__title-en'>Tile Codes</span>
-            <span className='legend__title-cn'>牌譜</span>
-          </div>
-          <div className='legend__groups'>
-            {SUIT_ORDER.map((suit) => {
-              const tiles = TILES_BY_SUIT[suit];
-              if (!tiles?.length) return null;
-              const label = SUIT_LABELS[suit];
-              return (
-                <div
-                  key={suit}
-                  className={`legend__group legend__group--${suit}`}
-                >
-                  <div className='legend__group-label'>
-                    <span className='legend__group-en'>{label.english}</span>
-                    <span className='legend__group-cn'>{label.chinese}</span>
-                  </div>
-                  <div className='legend__chips'>
-                    {tiles.map((tile) => {
-                      const isCalled = called.includes(tile.code);
-                      return (
-                        <button
-                          key={tile.code}
-                          type='button'
-                          className={`legend__chip${isCalled ? ' legend__chip--called' : ''}`}
-                          title={`${tile.code} — ${tile.english}`}
-                          onClick={() => {
-                            // Click a chip to fill the input (convenience)
-                            setInput(tile.code);
-                            setStatus({ kind: 'idle' });
-                            inputRef.current?.focus();
-                          }}
-                        >
-                          {tile.code}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </aside>
+        {/* Right-side column: input panel on top, legend below */}
+        <div className='side-column'>
 
-        {/* Input panel — top-right corner of main */}
         <aside className='input-panel' aria-label='Tile input'>
           <label htmlFor='tile-input' className='input-panel__label'>
             Enter code
@@ -277,7 +232,7 @@ function App() {
                 submit();
               }
             }}
-            placeholder='e.g. D5, WE, FP'
+            placeholder=''
             autoComplete='off'
             spellCheck={false}
             maxLength={4}
@@ -328,6 +283,54 @@ function App() {
             )}
           </div>
         </aside>
+
+          {/* Legend — under the input panel, same right-side column */}
+          <aside className='legend' aria-label='Tile code legend'>
+            <div className='legend__title'>
+              <span className='legend__title-en'>Tile Codes</span>
+              <span className='legend__title-cn'>牌譜</span>
+            </div>
+            <div className='legend__groups'>
+              {SUIT_ORDER.map((suit) => {
+                const tiles = TILES_BY_SUIT[suit];
+                if (!tiles?.length) return null;
+                const label = SUIT_LABELS[suit];
+                return (
+                  <div
+                    key={suit}
+                    className={`legend__group legend__group--${suit}`}
+                  >
+                    <div className='legend__group-label'>
+                      <span className='legend__group-en'>{label.english}</span>
+                      <span className='legend__group-cn'>{label.chinese}</span>
+                    </div>
+                    <div className='legend__chips'>
+                      {tiles.map((tile) => {
+                        const isCalled = called.includes(tile.code);
+                        return (
+                          <button
+                            key={tile.code}
+                            type='button'
+                            className={`legend__chip${isCalled ? ' legend__chip--called' : ''}`}
+                            title={`${tile.code} — ${tile.english}`}
+                            onClick={() => {
+                              // Click a chip to fill the input (convenience)
+                              setInput(tile.code);
+                              setStatus({ kind: 'idle' });
+                              inputRef.current?.focus();
+                            }}
+                          >
+                            {tile.code}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </aside>
+        </div>
       </main>
 
       {/* ============ FOOTER (10vh) ============ */}
