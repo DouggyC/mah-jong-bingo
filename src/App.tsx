@@ -13,13 +13,13 @@ const STORAGE_KEY = 'mahjong-bingo-called-v1';
 /** Suit metadata for the legend panel. */
 const SUIT_LABELS: Record<Tile['suit'], { english: string; chinese: string }> =
   {
-    characters: { english: 'Characters', chinese: '萬' },
-    marbles: { english: 'Marbles', chinese: '餅' },
-    bamboo: { english: 'Bamboo', chinese: '條' },
-    birthday: { english: 'Birthday', chinese: '風' },
-    dragon: { english: 'Dragons', chinese: '三元' },
-    flower: { english: 'Flowers', chinese: '花' },
-    compass: { english: 'Compass', chinese: '季' },
+    characters: { english: 'Characters', chinese: '' },
+    marbles: { english: 'Marbles', chinese: '' },
+    bamboo: { english: 'Bamboo', chinese: '' },
+    birthday: { english: 'Birthday', chinese: '' },
+    dragon: { english: 'Dragons', chinese: '' },
+    flower: { english: 'Flowers', chinese: '' },
+    compass: { english: 'Compass', chinese: '' },
     tile: { english: 'Tiles', chinese: '' },
     dice: { english: 'Dices', chinese: '' },
     west: { english: 'Wests', chinese: '' },
@@ -81,6 +81,8 @@ function App() {
   const [called, setCalled] = useState<TileCode[]>(() => loadCalled());
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<CallStatus>({ kind: 'idle' });
+  const [bingoActive, setBingoActive] = useState(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const footerScrollRef = useRef<HTMLDivElement>(null);
 
@@ -133,6 +135,22 @@ function App() {
     inputRef.current?.focus();
   }, [called.length]);
 
+  // Show the BINGO celebration for 5 seconds, then auto-dismiss.
+  // The called-tile list is NOT cleared — multiple games can run back-to-back.
+  // Show the BINGO celebration. The animation runs continuously — the
+  // overlay stays visible until the caller clicks anywhere to dismiss.
+  // The called-tile list is NOT cleared, so the next game can resume
+  // seamlessly without reset.
+  const triggerBingo = useCallback(() => {
+    setBingoActive(true);
+  }, []);
+
+  // Dismiss the BINGO overlay (clicked anywhere on it).
+  const dismissBingo = useCallback(() => {
+    setBingoActive(false);
+  }, []);
+
+
 
   const currentTile: Tile | undefined = useMemo(
     () =>
@@ -165,20 +183,31 @@ function App() {
           <span className='header__chinese'>麻將</span>
           <span className='header__english'>Mah-Jong Bingo</span>
         </h1>
-        <button
-          type='button'
-          className='header__undo'
-          onClick={undo}
-          disabled={called.length === 0}
-          aria-label='Undo last called tile'
-          title={
-            called.length > 0
-              ? `Undo last call (${called[called.length - 1]})`
-              : 'Nothing to undo'
-          }
-        >
-          ↶ Undo
-        </button>
+        <div className='header__actions'>
+          <button
+            type='button'
+            className='header__undo'
+            onClick={undo}
+            disabled={called.length === 0}
+            aria-label='Undo last called tile'
+            title={
+              called.length > 0
+                ? `Undo last call (${called[called.length - 1]})`
+                : 'Nothing to undo'
+            }
+          >
+            ↶ Undo
+          </button>
+          <button
+            type='button'
+            className='header__bingo'
+            onClick={triggerBingo}
+            aria-label='Trigger BINGO celebration'
+            title='BINGO! (celebration for 5 seconds)'
+          >
+            ✦ BINGO
+          </button>
+        </div>
 
       </header>
 
@@ -191,12 +220,13 @@ function App() {
               key={currentTile.code}
               src={currentTile.image}
               alt={`${currentTile.code} — ${currentTile.english}`}
-              className='stage__tile stage__tile--enter'
+              className='stage__tile'
               draggable={false}
             />
           ) : (
             <div className='stage__empty'>
               <div className='stage__empty-glyph'>麻</div>
+
               <p>Awaiting first call…</p>
             </div>
           )}
@@ -333,7 +363,46 @@ function App() {
         </div>
       </main>
 
+      {/* ============ BINGO OVERLAY (no auto-dismiss; click to continue) ============ */}
+
+      {bingoActive && (
+        <div
+          className='bingo-overlay'
+          role='status'
+          aria-live='assertive'
+          onClick={dismissBingo}
+          title='Click anywhere to dismiss'
+        >
+          {/* Coin shower — 96 falling coins, randomized via per-coin inline styles */}
+          <div className='bingo-coins' aria-hidden>
+            {Array.from({ length: 96 }).map((_, i) => (
+              <span
+                key={i}
+                className='bingo-coin'
+                style={{
+                  left: `${(i * 1.07 + (i % 11) * 0.83) % 100}%`,
+                  animationDelay: `${(i * 0.07) % 3.2}s`,
+                  animationDuration: `${2.0 + (i % 11) * 0.3}s`,
+                }}
+              >
+                ◉
+              </span>
+            ))}
+          </div>
+
+
+          <div className='bingo-burst' aria-hidden />
+          <div className='bingo-text'>
+            <div className='bingo-text__main'>BINGO!</div>
+            <div className='bingo-text__sub'>恭喜發財 · Congratulations</div>
+            <div className='bingo-text__hint'>Click anywhere to continue</div>
+          </div>
+
+        </div>
+      )}
+
       {/* ============ FOOTER (10vh) ============ */}
+
       <footer className='footer'>
         <div className='footer__label'>
           Called <span className='footer__count'>{totalCalled}</span>
