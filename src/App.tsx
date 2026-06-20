@@ -223,19 +223,17 @@ function App() {
         {/* Large tile display */}
         <section className='stage' aria-live='polite'>
           {currentTile ? (
-            <div className='stage__slot' key={currentTile.code}>
-              <span className='stage__flash' key={`flash-${currentTile.code}`} />
-              <img
-                src={currentTile.image}
-                alt={`${currentTile.code} — ${currentTile.english}`}
-                className='stage__tile'
-                draggable={false}
-              />
-            </div>
+            <img
+              key={currentTile.code}
+              src={currentTile.image}
+              alt={`${currentTile.code} — ${currentTile.english}`}
+              className='stage__tile'
+              draggable={false}
+            />
           ) : (
             <div className='stage__empty'>
-
               <div className='stage__empty-glyph'>麻</div>
+
               <p>Awaiting first call…</p>
             </div>
           )}
