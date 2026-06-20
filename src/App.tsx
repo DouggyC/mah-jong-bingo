@@ -13,13 +13,13 @@ const STORAGE_KEY = 'mahjong-bingo-called-v1';
 /** Suit metadata for the legend panel. */
 const SUIT_LABELS: Record<Tile['suit'], { english: string; chinese: string }> =
   {
-    characters: { english: 'Characters', chinese: '萬' },
-    marbles: { english: 'Marbles', chinese: '餅' },
-    bamboo: { english: 'Bamboo', chinese: '條' },
-    birthday: { english: 'Birthday', chinese: '風' },
-    dragon: { english: 'Dragons', chinese: '三元' },
-    flower: { english: 'Flowers', chinese: '花' },
-    compass: { english: 'Compass', chinese: '季' },
+    characters: { english: 'Characters', chinese: '' },
+    marbles: { english: 'Marbles', chinese: '' },
+    bamboo: { english: 'Bamboo', chinese: '' },
+    birthday: { english: 'Birthday', chinese: '' },
+    dragon: { english: 'Dragons', chinese: '' },
+    flower: { english: 'Flowers', chinese: '' },
+    compass: { english: 'Compass', chinese: '' },
     tile: { english: 'Tiles', chinese: '' },
     dice: { english: 'Dices', chinese: '' },
     west: { english: 'Wests', chinese: '' },
@@ -82,7 +82,6 @@ function App() {
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<CallStatus>({ kind: 'idle' });
   const [bingoActive, setBingoActive] = useState(false);
-  const bingoTimeoutRef = useRef<number | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const footerScrollRef = useRef<HTMLDivElement>(null);
@@ -138,36 +137,19 @@ function App() {
 
   // Show the BINGO celebration for 5 seconds, then auto-dismiss.
   // The called-tile list is NOT cleared — multiple games can run back-to-back.
-  // Show the BINGO celebration for 10 seconds, then auto-dismiss.
-  // The called-tile list is NOT cleared — multiple games can run back-to-back.
+  // Show the BINGO celebration. The animation runs continuously — the
+  // overlay stays visible until the caller clicks anywhere to dismiss.
+  // The called-tile list is NOT cleared, so the next game can resume
+  // seamlessly without reset.
   const triggerBingo = useCallback(() => {
-    if (bingoTimeoutRef.current !== null) {
-      window.clearTimeout(bingoTimeoutRef.current);
-    }
     setBingoActive(true);
-    bingoTimeoutRef.current = window.setTimeout(() => {
-      setBingoActive(false);
-      bingoTimeoutRef.current = null;
-    }, 10000);
   }, []);
 
-  // Dismiss the BINGO overlay early (used by click-to-exit).
+  // Dismiss the BINGO overlay (clicked anywhere on it).
   const dismissBingo = useCallback(() => {
-    if (bingoTimeoutRef.current !== null) {
-      window.clearTimeout(bingoTimeoutRef.current);
-      bingoTimeoutRef.current = null;
-    }
     setBingoActive(false);
   }, []);
 
-  // Clear the BINGO timeout if the component unmounts.
-  useEffect(() => {
-    return () => {
-      if (bingoTimeoutRef.current !== null) {
-        window.clearTimeout(bingoTimeoutRef.current);
-      }
-    };
-  }, []);
 
 
   const currentTile: Tile | undefined = useMemo(
@@ -381,7 +363,8 @@ function App() {
         </div>
       </main>
 
-      {/* ============ BINGO OVERLAY (5s) ============ */}
+      {/* ============ BINGO OVERLAY (no auto-dismiss; click to continue) ============ */}
+
       {bingoActive && (
         <div
           className='bingo-overlay'
@@ -390,22 +373,24 @@ function App() {
           onClick={dismissBingo}
           title='Click anywhere to dismiss'
         >
-          {/* Coin shower — 48 falling coins, randomized via per-coin inline styles */}
+          {/* Coin shower — 96 falling coins, randomized via per-coin inline styles */}
           <div className='bingo-coins' aria-hidden>
-            {Array.from({ length: 48 }).map((_, i) => (
+            {Array.from({ length: 96 }).map((_, i) => (
               <span
                 key={i}
                 className='bingo-coin'
                 style={{
-                  left: `${(i * 2.13 + (i % 7) * 1.31) % 100}%`,
-                  animationDelay: `${(i * 0.11) % 2.8}s`,
-                  animationDuration: `${2.0 + (i % 7) * 0.3}s`,
+                  left: `${(i * 1.07 + (i % 11) * 0.83) % 100}%`,
+                  animationDelay: `${(i * 0.07) % 3.2}s`,
+                  animationDuration: `${2.0 + (i % 11) * 0.3}s`,
                 }}
               >
                 ◉
               </span>
             ))}
           </div>
+
+
           <div className='bingo-burst' aria-hidden />
           <div className='bingo-text'>
             <div className='bingo-text__main'>BINGO!</div>
