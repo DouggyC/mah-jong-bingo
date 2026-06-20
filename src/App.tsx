@@ -138,6 +138,8 @@ function App() {
 
   // Show the BINGO celebration for 5 seconds, then auto-dismiss.
   // The called-tile list is NOT cleared — multiple games can run back-to-back.
+  // Show the BINGO celebration for 10 seconds, then auto-dismiss.
+  // The called-tile list is NOT cleared — multiple games can run back-to-back.
   const triggerBingo = useCallback(() => {
     if (bingoTimeoutRef.current !== null) {
       window.clearTimeout(bingoTimeoutRef.current);
@@ -146,7 +148,16 @@ function App() {
     bingoTimeoutRef.current = window.setTimeout(() => {
       setBingoActive(false);
       bingoTimeoutRef.current = null;
-    }, 5000);
+    }, 10000);
+  }, []);
+
+  // Dismiss the BINGO overlay early (used by click-to-exit).
+  const dismissBingo = useCallback(() => {
+    if (bingoTimeoutRef.current !== null) {
+      window.clearTimeout(bingoTimeoutRef.current);
+      bingoTimeoutRef.current = null;
+    }
+    setBingoActive(false);
   }, []);
 
   // Clear the BINGO timeout if the component unmounts.
@@ -372,17 +383,23 @@ function App() {
 
       {/* ============ BINGO OVERLAY (5s) ============ */}
       {bingoActive && (
-        <div className='bingo-overlay' role='status' aria-live='assertive'>
-          {/* Coin shower — 24 falling coins, randomized via nth-child delays */}
+        <div
+          className='bingo-overlay'
+          role='status'
+          aria-live='assertive'
+          onClick={dismissBingo}
+          title='Click anywhere to dismiss'
+        >
+          {/* Coin shower — 48 falling coins, randomized via per-coin inline styles */}
           <div className='bingo-coins' aria-hidden>
-            {Array.from({ length: 24 }).map((_, i) => (
+            {Array.from({ length: 48 }).map((_, i) => (
               <span
                 key={i}
                 className='bingo-coin'
                 style={{
-                  left: `${(i * 4.3 + (i % 3) * 1.7) % 100}%`,
-                  animationDelay: `${(i * 0.07) % 1.4}s`,
-                  animationDuration: `${1.6 + (i % 5) * 0.2}s`,
+                  left: `${(i * 2.13 + (i % 7) * 1.31) % 100}%`,
+                  animationDelay: `${(i * 0.11) % 2.8}s`,
+                  animationDuration: `${2.0 + (i % 7) * 0.3}s`,
                 }}
               >
                 ◉
@@ -393,7 +410,9 @@ function App() {
           <div className='bingo-text'>
             <div className='bingo-text__main'>BINGO!</div>
             <div className='bingo-text__sub'>恭喜發財 · Congratulations</div>
+            <div className='bingo-text__hint'>Click anywhere to continue</div>
           </div>
+
         </div>
       )}
 

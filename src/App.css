@@ -741,6 +741,8 @@ body::before {
   background: rgba(20, 10, 4, 0.55);
   backdrop-filter: blur(3px);
   animation: bingoFadeIn 0.3s ease-out forwards;
+  cursor: pointer; /* click anywhere to dismiss */
+  user-select: none;
 }
 
 @keyframes bingoFadeIn {
@@ -802,6 +804,19 @@ body::before {
   color: #fff8e6;
   text-transform: uppercase;
 }
+.bingo-text__hint {
+  font-size: clamp(0.75rem, 1.4vh, 1rem);
+  letter-spacing: 0.2em;
+  margin-top: 0.7rem;
+  color: #fff8e6;
+  opacity: 0.75;
+  text-transform: uppercase;
+  animation: bingoHintBlink 1.6s ease-in-out infinite;
+}
+@keyframes bingoHintBlink {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.9;  }
+}
 
 @keyframes bingoPunch {
   0%   { opacity: 0; transform: scale(0.4) rotate(-6deg); }
@@ -822,14 +837,16 @@ body::before {
 }
 .bingo-coin {
   position: absolute;
-  top: -2rem;
-  font-size: 1.6rem;
+  top: -4rem;
+  font-size: 3.2rem; /* doubled from 1.6rem */
   color: var(--gold);
-  text-shadow: 0 0 6px rgba(255, 200, 80, 0.8), 0 2px 2px rgba(120, 60, 0, 0.5);
+  text-shadow: 0 0 12px rgba(255, 200, 80, 0.85), 0 3px 3px rgba(120, 60, 0, 0.55);
   animation-name: coinFall;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
+  pointer-events: none;
 }
+
 @keyframes coinFall {
   0%   { transform: translateY(0)     rotate(0deg);   opacity: 0; }
   8%   { opacity: 1; }
