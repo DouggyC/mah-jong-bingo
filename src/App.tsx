@@ -81,6 +81,9 @@ function App() {
   const [called, setCalled] = useState<TileCode[]>(() => loadCalled());
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<CallStatus>({ kind: 'idle' });
+  const [bingoActive, setBingoActive] = useState(false);
+  const bingoTimeoutRef = useRef<number | null>(null);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const footerScrollRef = useRef<HTMLDivElement>(null);
 
@@ -133,6 +136,28 @@ function App() {
     inputRef.current?.focus();
   }, [called.length]);
 
+  // Show the BINGO celebration for 5 seconds, then auto-dismiss.
+  // The called-tile list is NOT cleared — multiple games can run back-to-back.
+  const triggerBingo = useCallback(() => {
+    if (bingoTimeoutRef.current !== null) {
+      window.clearTimeout(bingoTimeoutRef.current);
+    }
+    setBingoActive(true);
+    bingoTimeoutRef.current = window.setTimeout(() => {
+      setBingoActive(false);
+      bingoTimeoutRef.current = null;
+    }, 5000);
+  }, []);
+
+  // Clear the BINGO timeout if the component unmounts.
+  useEffect(() => {
+    return () => {
+      if (bingoTimeoutRef.current !== null) {
+        window.clearTimeout(bingoTimeoutRef.current);
+      }
+    };
+  }, []);
+
 
   const currentTile: Tile | undefined = useMemo(
     () =>
@@ -165,20 +190,31 @@ function App() {
           <span className='header__chinese'>麻將</span>
           <span className='header__english'>Mah-Jong Bingo</span>
         </h1>
-        <button
-          type='button'
-          className='header__undo'
-          onClick={undo}
-          disabled={called.length === 0}
-          aria-label='Undo last called tile'
-          title={
-            called.length > 0
-              ? `Undo last call (${called[called.length - 1]})`
-              : 'Nothing to undo'
-          }
-        >
-          ↶ Undo
-        </button>
+        <div className='header__actions'>
+          <button
+            type='button'
+            className='header__undo'
+            onClick={undo}
+            disabled={called.length === 0}
+            aria-label='Undo last called tile'
+            title={
+              called.length > 0
+                ? `Undo last call (${called[called.length - 1]})`
+                : 'Nothing to undo'
+            }
+          >
+            ↶ Undo
+          </button>
+          <button
+            type='button'
+            className='header__bingo'
+            onClick={triggerBingo}
+            aria-label='Trigger BINGO celebration'
+            title='BINGO! (celebration for 5 seconds)'
+          >
+            ✦ BINGO
+          </button>
+        </div>
 
       </header>
 
@@ -187,15 +223,18 @@ function App() {
         {/* Large tile display */}
         <section className='stage' aria-live='polite'>
           {currentTile ? (
-            <img
-              key={currentTile.code}
-              src={currentTile.image}
-              alt={`${currentTile.code} — ${currentTile.english}`}
-              className='stage__tile stage__tile--enter'
-              draggable={false}
-            />
+            <div className='stage__slot' key={currentTile.code}>
+              <span className='stage__flash' key={`flash-${currentTile.code}`} />
+              <img
+                src={currentTile.image}
+                alt={`${currentTile.code} — ${currentTile.english}`}
+                className='stage__tile'
+                draggable={false}
+              />
+            </div>
           ) : (
             <div className='stage__empty'>
+
               <div className='stage__empty-glyph'>麻</div>
               <p>Awaiting first call…</p>
             </div>
@@ -333,7 +372,35 @@ function App() {
         </div>
       </main>
 
+      {/* ============ BINGO OVERLAY (5s) ============ */}
+      {bingoActive && (
+        <div className='bingo-overlay' role='status' aria-live='assertive'>
+          {/* Coin shower — 24 falling coins, randomized via nth-child delays */}
+          <div className='bingo-coins' aria-hidden>
+            {Array.from({ length: 24 }).map((_, i) => (
+              <span
+                key={i}
+                className='bingo-coin'
+                style={{
+                  left: `${(i * 4.3 + (i % 3) * 1.7) % 100}%`,
+                  animationDelay: `${(i * 0.07) % 1.4}s`,
+                  animationDuration: `${1.6 + (i % 5) * 0.2}s`,
+                }}
+              >
+                ◉
+              </span>
+            ))}
+          </div>
+          <div className='bingo-burst' aria-hidden />
+          <div className='bingo-text'>
+            <div className='bingo-text__main'>BINGO!</div>
+            <div className='bingo-text__sub'>恭喜發財 · Congratulations</div>
+          </div>
+        </div>
+      )}
+
       {/* ============ FOOTER (10vh) ============ */}
+
       <footer className='footer'>
         <div className='footer__label'>
           Called <span className='footer__count'>{totalCalled}</span>
