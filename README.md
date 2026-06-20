@@ -10,7 +10,7 @@ Type a tile code in the input panel (top-right of main) and press **Enter** (or 
 
 | Code | Tile |
 | --- | --- |
-| `D1`–`D9` | Dots (圓 / 餅) |
+| `D1`–`D9` | Marbles (圓 / 餅) |
 | `B1`–`B9` | Bamboo (索 / 條) |
 | `C1`–`C9` | Characters (萬) |
 | `WE` `WS` `WW` `WN` | Winds 東南西北 |
@@ -20,8 +20,8 @@ Type a tile code in the input panel (top-right of main) and press **Enter** (or 
 
 Codes are case-insensitive. The input panel shows a live preview of the tile as you type.
 Duplicates are silently blocked (the tile is shown in the status bar as "already called").
-The called-tile list persists across page reloads via `localStorage`. The Reset button in
-the top-right corner clears all called tiles.
+The called-tile list persists across page reloads via `localStorage`. The Undo button in
+the top-right corner removes the most recently called tile (no confirmation — just click again to re-call).
 
 ## Running
 
@@ -50,7 +50,8 @@ designs total. Each design can be called exactly once per game.
 ```
 ┌─────────────────────────────────────────────┐
 │ HEADER  (5vh)                               │
-│   麻將 Mah-Jong Bingo        ⟲ Reset        │
+│   麻將 Mah-Jong Bingo        ↶ Undo         │
+
 ├─────────────────────────────────────────────┤
 │ MAIN  (80vh)                                │
 │            [BIG TILE IMAGE]                 │

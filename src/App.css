@@ -145,7 +145,7 @@ body::before {
   color: var(--ink-soft);
 }
 
-.header__reset {
+.header__undo {
   appearance: none;
   border: 1.5px solid var(--vermillion);
   background: linear-gradient(180deg, #fff7e6 0%, #f6e0b8 100%);
@@ -157,15 +157,22 @@ body::before {
   padding: 6px 14px;
   border-radius: 999px;
   cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s;
+  transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s, opacity 0.15s;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 1px 2px var(--shadow);
 }
-.header__reset:hover {
+.header__undo:hover:not(:disabled) {
   background: linear-gradient(180deg, #fff4d6 0%, #f1d49a 100%);
   box-shadow: 0 2px 4px var(--shadow);
 }
-.header__reset:active {
+.header__undo:active:not(:disabled) {
   transform: translateY(1px);
+}
+.header__undo:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: var(--paper-3);
+  color: var(--ink-soft);
+  background: linear-gradient(180deg, #f7eed3 0%, #efe3c2 100%);
 }
 
 /* ===== Main (80vh) ======================================== */
